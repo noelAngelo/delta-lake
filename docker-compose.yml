@@ -17,77 +17,28 @@ services:
     networks:
       - lakehouse
 
-  trino-coordinator:
-    image: 'trinodb/trino:latest'
-    hostname: trino-coordinator
+  delta:
+    image: deltaio/delta-docker:latest_arm64
+    entrypoint: ['bash', 'pyspark',
+                 '--packages', 'io.delta:delta-core_2.12:2.3.0',
+                 '--packages', 'org.apache.hadoop:hadoop-aws:3.3.2',
+                 '--conf', 'spark.hadoop.fs.s3a.aws.credentials.provider=org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider',
+                 '--conf', 'spark.hadoop.fs.s3a.access.key=minio',
+                 '--conf', 'spark.hadoop.fs.s3a.secret.key=minio123',
+                 '--conf', 'spark.hadoop.fs.s3a.endpoint=http://minio:9000',
+                 '--conf', 'spark.hadoop.fs.s3a.path.style.access=true',
+                 '--conf', 'spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem',
+                 '--conf', 'spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension',
+                 '--conf', 'spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog']
+    environment:
+      PYSPARK_DRIVER_PYTHON: jupyter
+      PYSPARK_DRIVER_PYTHON_OPTS: 'lab --ip=0.0.0.0'
     ports:
-      - '8090:8080'
-    volumes:
-      - ./trino:/etc/trino
+      - "8888:8888"
+#    volumes:
+#      - ./delta/data:/opt/spark/work-dir
     networks:
       - lakehouse
-
-  spark-master:
-    image: bitnami/spark:3.3.2
-    environment:
-      - SPARK_MODE=master
-      - SPARK_MASTER_HOST=spark-master
-    ports:
-      - "7077:7077"
-      - "8080:8080"
-      - "4040:4040"
-      - "10000:10000"
-    volumes:
-      - ./spark/data:/data
-      - ./spark/src:/src
-      - ./spark/app:/app
-    working_dir: /app
-    command: >
-      bash -c 'useradd -r -s /bin/false -U spark &&
-       mkdir -p /var/lib/apt/lists/partial &&
-       chown -R _apt /var/lib/apt/lists &&
-       /opt/bitnami/scripts/spark/run.sh &
-       /opt/bitnami/spark/sbin/start-thriftserver.sh'
-    user: root
-    networks:
-    - lakehouse
-
-  spark-worker:
-    image: bitnami/spark:3.3.2
-    environment:
-      - SPARK_MODE=worker
-      - SPARK_MASTER_URL=spark://spark-master:7077
-      - SPARK_WORKER_MEMORY=2g
-      - SPARK_WORKER_CORES=1
-    ports:
-      - '8081:8081'
-    volumes:
-      - ./spark/data:/data
-      - ./spark/src:/src
-      - ./spark/app:/app
-    working_dir: /app
-    user: root
-    networks:
-      - lakehouse
-
-  jupyter:
-    image: jupyter/pyspark-notebook:aarch64-latest
-    depends_on:
-      - spark-master
-      - spark-worker
-    environment:
-      - JUPYTER_ENABLE_LAB=yes
-      - GRANT_SUDO=yes
-    ports:
-      - '8890:8888'
-    volumes:
-      - ./spark/data:/data
-    working_dir: /data
-    user: root
-    command: >
-      start-notebook.sh --ip 0.0.0.0 --port 8888 --NotebookApp.token='' --NotebookApp.password=''
-    networks:
-    - lakehouse
 
 
 volumes:
