@@ -18,7 +18,7 @@ services:
       - lakehouse
 
   delta:
-    image: deltaio/delta-docker:latest_arm64
+    image: deltaio/delta-docker:latest
     entrypoint: ['bash', 'pyspark',
                  '--packages', 'io.delta:delta-core_2.12:2.3.0',
                  '--packages', 'org.apache.hadoop:hadoop-aws:3.3.2',
