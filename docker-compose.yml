@@ -20,8 +20,7 @@ services:
   delta:
     image: deltaio/delta-docker:latest_arm64
     entrypoint: ['bash', 'pyspark',
-                 '--packages', 'io.delta:delta-core_2.12:2.3.0',
-                 '--packages', 'org.apache.hadoop:hadoop-aws:3.3.2',
+                 '--packages', 'io.delta:delta-core_2.12:2.3.0,org.apache.hadoop:hadoop-aws:3.3.2',
                  '--conf', 'spark.hadoop.fs.s3a.aws.credentials.provider=org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider',
                  '--conf', 'spark.hadoop.fs.s3a.access.key=minio',
                  '--conf', 'spark.hadoop.fs.s3a.secret.key=minio123',
