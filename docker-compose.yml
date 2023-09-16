@@ -17,29 +17,6 @@ services:
     networks:
       - lakehouse
 
-  delta:
-    image: deltaio/delta-docker:latest_arm64
-    entrypoint: ['bash', 'pyspark',
-                 '--packages', 'io.delta:delta-core_2.12:2.3.0,org.apache.hadoop:hadoop-aws:3.3.2',
-                 '--conf', 'spark.hadoop.fs.s3a.aws.credentials.provider=org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider',
-                 '--conf', 'spark.hadoop.fs.s3a.access.key=minio',
-                 '--conf', 'spark.hadoop.fs.s3a.secret.key=minio123',
-                 '--conf', 'spark.hadoop.fs.s3a.endpoint=http://minio:9000',
-                 '--conf', 'spark.hadoop.fs.s3a.path.style.access=true',
-                 '--conf', 'spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem',
-                 '--conf', 'spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension',
-                 '--conf', 'spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog']
-    environment:
-      PYSPARK_DRIVER_PYTHON: jupyter
-      PYSPARK_DRIVER_PYTHON_OPTS: 'lab --ip=0.0.0.0'
-    ports:
-      - "8888:8888"
-#    volumes:
-#      - ./delta/data:/opt/spark/work-dir
-    networks:
-      - lakehouse
-
-
 volumes:
   minio-data:
     driver: local
