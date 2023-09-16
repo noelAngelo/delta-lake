@@ -39,16 +39,20 @@ services:
       - lakehouse
 
   hive-metastore:
-    image: apache/hive:3.1.3
+    build:
+      context: hive-metastore
     depends_on:
       - postgres
     environment:
       - SERVICE_NAME=metastore
       - DB_DRIVER=postgres
       - HIVE_CUSTOM_CONF_DIR=/hive_custom_conf
+      - IS_RESUME="true"
     ports:
       - "9083:9083"
+      - "10000:10000"
     volumes:
+      - ./hive-metastore/warehouse:/opt/hive/data/warehouse
       - ./hive-metastore/conf:/hive_custom_conf
     networks:
       - lakehouse

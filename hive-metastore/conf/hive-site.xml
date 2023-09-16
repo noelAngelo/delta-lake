@@ -22,4 +22,29 @@
         <value>hive123</value>
         <description>the password for the DB instance</description>
     </property>
+
+    <property>
+        <name>fs.s3a.impl</name>
+        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
+    </property>
+    <property>
+        <name>fs.s3a.access.key</name>
+        <value>minio</value>
+    </property>
+    <property>
+        <name>fs.s3a.secret.key</name>
+        <value>minio123</value>
+    </property>
+    <property>
+        <name>fs.s3a.connection.ssl.enabled</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>fs.s3a.path.style.access</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>fs.s3a.endpoint</name>
+        <value>http://minio:9000</value>
+    </property>
 </configuration>
