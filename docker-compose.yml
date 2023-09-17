@@ -22,7 +22,7 @@ services:
       context: postgres
     restart: always
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready", "-d", "metastore_db" ]
+      test: [ "CMD-SHELL", "pg_isready", "-U", "hive", "-d", "metastore_db" ]
       interval: 30s
       timeout: 60s
       retries: 5
@@ -47,7 +47,7 @@ services:
       - SERVICE_NAME=metastore
       - DB_DRIVER=postgres
       - HIVE_CUSTOM_CONF_DIR=/hive_custom_conf
-      - IS_RESUME="true"
+      - IS_RESUME=true
     ports:
       - "9083:9083"
       - "10000:10000"
