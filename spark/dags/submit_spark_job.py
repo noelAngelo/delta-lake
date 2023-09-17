@@ -16,7 +16,8 @@ AWS_HADOOP_VERSION = '3.3.2'
     catchup=False,
     params={
         "job_name": None,
-        "application": Param("/airflow/jobs/ingestor.py")
+        "application": Param("/airflow/jobs/ingestor.py"),
+        "source_dir": None
     },
     tags=["spark"],
 )
@@ -24,7 +25,6 @@ def submit_spark_job():
 
     submit_job = SparkSubmitOperator(
         task_id="submit_job",
-        name="airflow-job-"+"{{ params.application }}",
         application="{{ params.application }}",
         packages=f'io.delta:delta-core_{SCALA_VERSION}:{DELTA_CORE_VERSION},org.apache.hadoop:hadoop-aws:{AWS_HADOOP_VERSION}',
         conf={
@@ -36,7 +36,8 @@ def submit_spark_job():
             'spark.hadoop.fs.s3a.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
             'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog'
-        }
+        },
+        application_args=["{{ params.job_name }}", "{{  params.source_dir }}"]
     )
 
 
