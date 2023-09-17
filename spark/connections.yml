@@ -1,0 +1,9 @@
+spark_default:
+  conn_type: spark
+  description: ''
+  extra: ''
+  host: spark://spark-master
+  login: ''
+  password: null
+  port: 7077
+  schema: ''
