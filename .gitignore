@@ -2,3 +2,4 @@ spark/**
 delta/**
 .venv/
 .idea/*
+.ngrok.yml

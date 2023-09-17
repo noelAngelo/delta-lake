@@ -42,7 +42,8 @@ services:
     build:
       context: hive-metastore
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       - SERVICE_NAME=metastore
       - DB_DRIVER=postgres
@@ -50,7 +51,6 @@ services:
       - IS_RESUME=true
     ports:
       - "9083:9083"
-      - "10000:10000"
     volumes:
       - ./hive-metastore/warehouse:/opt/hive/data/warehouse
       - ./hive-metastore/conf:/hive_custom_conf
