@@ -31,8 +31,6 @@ services:
       - POSTGRES_USER=hive
       - POSTGRES_PASSWORD=hive123
       - POSTGRES_DB=metastore_db
-    ports:
-      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
@@ -48,7 +46,7 @@ services:
       - SERVICE_NAME=metastore
       - DB_DRIVER=postgres
       - HIVE_CUSTOM_CONF_DIR=/hive_custom_conf
-      - IS_RESUME=true
+      # - IS_RESUME=true
     ports:
       - "9083:9083"
     volumes:
@@ -60,7 +58,7 @@ services:
   trino:
     image: trinodb/trino:latest
     ports:
-      - "8080:8080"
+      - "8090:8080"
     volumes:
       - ./trino/etc:/etc/trino
     networks:
@@ -105,15 +103,13 @@ services:
     build:
       context: spark
     entrypoint: ["bash", "-c", "airflow standalone"]
-    environment:
-      - AIRFLOW__CORE__LOAD_EXAMPLES=false
-      - AIRFLOW__DATABASE__LOAD_DEFAULT_CONNECTIONS=false
     ports:
       - "8088:8080"
     volumes:
       - ./spark/dags:/airflow/dags
       - ./spark/jobs:/airflow/jobs
       - ./spark/connections.yml:/airflow/connections.yml
+      - ./spark/airflow.cfg:/airflow/airflow.cfg
     networks:
       - lakehouse
 

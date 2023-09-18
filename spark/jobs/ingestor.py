@@ -26,23 +26,24 @@ class Transformer:
         return df
 
 
-
 class Ingestor:
     """Class to ingest files from an S3 directory into a Delta Lake"""
 
     def __init__(self,
                  ss: SparkSession,
                  source: str,
+                 path: str,
                  name: str,
                  target: str,
-                 checkpoint_location: str,
+                 checkpoints: str,
                  schema: str):
         logging.info("Running Ingestor with settings ...")
         self.ss = ss
         self.source_bucket = source
         self.source_name = name
+        self.source_path = path
         self.target_bucket = target
-        self.checkpoint_bucket = checkpoint_location
+        self.checkpoints = checkpoints
         self.target_schema = schema
         logging.info(f"Ingestor for {self.source_name} has been initialised successfully ...")
 
@@ -51,7 +52,7 @@ class Ingestor:
         logging.info(f"Reading files from {self.source_bucket}")
         dataframe = (spark.readStream
                      .format("json")
-                     .load(f"s3a://{self.source_bucket}/{self.source_name}/*"))
+                     .load(f"s3a://{self.source_bucket}/{self.source_path}/*"))
         logging.info(f"Found {len(dataframe.columns)} columns")
         dataframe.printSchema()
         return dataframe
@@ -61,11 +62,11 @@ class Ingestor:
 
         # Write to Delta Lake
         (df.write.format("delta")
-         .option("overwriteSchema", "true")
-         .option("mergeSchema", "true")
-         .mode("append")
-         .saveAsTable(
-            f"{self.target_schema}.{self.source_name}"))
+        .option("overwriteSchema", "true")
+        .option("mergeSchema", "true")
+        .mode("append")
+        .saveAsTable(
+            f"{self.source_name}"))
 
     def start(self):
         """Writes the ingested data into delta lake"""
@@ -78,7 +79,7 @@ class Ingestor:
         logging.info(f"Writing files into {self.target_bucket}")
         write_stream = (transformed_stream.writeStream
                         .format("delta")
-                        .option("checkpointLocation", self.checkpoint_bucket)
+                        .option("checkpointLocation", f's3a://{self.checkpoints}/{self.source_name}')
                         .foreachBatch(lambda mdf, batch_id: self._process_microbatch(mdf, batch_id)))
 
         query = write_stream.trigger(once=True).start()
@@ -97,8 +98,8 @@ if __name__ == "__main__":
     logger.setLevel(logging.INFO)
 
     # collect from args
-    source_name, source_bucket, source_dir = sys.argv[0], sys.argv[1], sys.argv[2]
-    target_bucket, target_schema, checkpoint_bucket = sys.argv[3], sys.argv[4], sys.argv[5]
+    source_bucket, source_name, source_path = sys.argv[1], sys.argv[2], sys.argv[3]
+    target_bucket, target_schema, checkpoint_location = sys.argv[4], sys.argv[5], sys.argv[6]
 
     # start a Spark session
     spark = SparkSession \
@@ -111,8 +112,9 @@ if __name__ == "__main__":
     ingestor = Ingestor(spark,
                         source=source_bucket,
                         name=source_name,
+                        path=source_path,
                         target=target_bucket,
-                        checkpoint_location=checkpoint_bucket,
+                        checkpoints=checkpoint_location,
                         schema=target_schema)
     ingestor.start()
     spark.stop()
