@@ -62,7 +62,7 @@ services:
     volumes:
       - ./trino/etc:/etc/trino
     networks:
-      - lakehouses
+      - lakehouse
 
 volumes:
   postgres-data:
