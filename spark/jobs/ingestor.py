@@ -62,8 +62,6 @@ class Ingestor:
 
         # Write to Delta Lake
         (df.write.format("delta")
-        .option("overwriteSchema", "true")
-        .option("mergeSchema", "true")
         .mode("append")
         .saveAsTable(
             f"{self.source_name}"))
@@ -79,7 +77,7 @@ class Ingestor:
         logging.info(f"Writing files into {self.target_bucket}")
         write_stream = (transformed_stream.writeStream
                         .format("delta")
-                        .option("checkpointLocation", f's3a://{self.checkpoints}/{self.source_name}')
+                        .option("checkpointLocation", f's3a://{self.checkpoints}/')
                         .foreachBatch(lambda mdf, batch_id: self._process_microbatch(mdf, batch_id)))
 
         query = write_stream.trigger(once=True).start()

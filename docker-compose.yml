@@ -46,7 +46,7 @@ services:
       - SERVICE_NAME=metastore
       - DB_DRIVER=postgres
       - HIVE_CUSTOM_CONF_DIR=/hive_custom_conf
-      # - IS_RESUME=true
+
     ports:
       - "9083:9083"
     volumes:
