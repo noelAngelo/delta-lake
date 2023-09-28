@@ -43,6 +43,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      - IS_RESUME=trues
       - SERVICE_NAME=metastore
       - DB_DRIVER=postgres
       - HIVE_CUSTOM_CONF_DIR=/hive_custom_conf
